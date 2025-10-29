@@ -33,7 +33,30 @@ class Constants:
 class Diagram:
     @staticmethod
     def diagram(data: list[str], optional_params: Optional[str] = None) -> None: 
-        print(optional_params)
+        # Определяем цвет линии
+        color = 'red' if len(data) > 1 and data[-2] > data[-1] else 'green'
+
+        # Создаем фигуру и оси
+        fig, ax = plt.subplots(figsize=(10, 5))
+
+        # Строим график
+        ax.plot(range(1, len(data) + 1), data, marker='o', color=color)
+        ax.set_xlabel('Количество тестов')
+        ax.set_ylabel('Количество баллов')
+        ax.set_xticks(range(1, len(data) + 1))
+        ax.set_yticks(range(int(min(data)), int(max(data)) + 1))
+
+        # Добавляем текст справа от графика
+        if optional_params is not None:
+            ax.text(
+                1.05, 0.5, optional_params,
+                transform=ax.transAxes,
+                verticalalignment='center',
+                bbox=dict(boxstyle='round', facecolor='white', alpha=0.5)
+            )
+
+        plt.tight_layout()
+        plt.show()
 
 
 class FileWorker:
@@ -205,19 +228,18 @@ class Program:
         
         # получаем содержимое файла и выводим его на экран
         file_content: list[str] = FileWorker.get_lines(path)
-        FileWorker.show_file_content(file_content)
 
         if len(file_content) > 0:
             scores: list[int] = [int(line.split(" ")[1].replace("\n", '')) for line in file_content]
             
-            count: int = len(scores)
-            max_score: int = max(scores)
-            min_score: int = min(scores)
-            mid: float = round(sum(scores)/len(scores), 2)
+            count: int = len(scores)  # суммарное количество тестов
+            max_score: int = max(scores)  # максимальное количество баллов
+            min_score: int = min(scores)  # минимальное количество баллов
+            mid: float = round(sum(scores)/len(scores), 2)  # среднее количество баллов
             mid_by_last_values: Union[float, str] = round((scores[-1]+scores[-2]+scores[-3])/count, 2) if count >= 3 else "too less values"
 
             optional_params: str = f'count of values: {count}\nmax score: {max_score}\nmin score: {min_score}\nmiddle grade: {mid}\nmiddle grade by last 3 values: {mid_by_last_values}'
-            Diagram.diagram(file_content, optional_params)
+            Diagram.diagram(scores, optional_params)
 
     
 def main() -> None: 
